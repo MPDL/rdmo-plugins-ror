@@ -6,6 +6,7 @@ import requests
 
 from rdmo.options.providers import Provider
 
+from .handlers import get_name
 
 class RorProvider(Provider):
 
@@ -13,12 +14,13 @@ class RorProvider(Provider):
     refresh = True
 
     def get_options(self, project, search=None, user=None, site=None):
-        if search:
+        if search and len(search) > 2:
             url = getattr(settings, 'ROR_PROVIDER_URL', 'https://api.ror.org/v1/').rstrip('/')
             headers = getattr(settings, 'ROR_PROVIDER_HEADERS', {})
 
             response = requests.get(url + '/organizations', params={
                 'query': self.get_search(search)
+                # 'affiliation': self.get_search(search)
             }, headers=headers)
 
             try:
@@ -39,9 +41,9 @@ class RorProvider(Provider):
 
     def get_id(self, item):
         return item.get('id', '').replace('https://ror.org/', '')
-
+    
     def get_text(self, item):
-        return '{name} [{id}]'.format(name=item.get('name', ''), id=self.get_id(item))
+        return '{name} [{id}]'.format(name=get_name(item), id=self.get_id(item))
 
     def get_search(self, search):
         # reverse get_text to perform the search, remove everything after [
@@ -51,4 +53,4 @@ class RorProvider(Provider):
         else:
             tokens = search.split()
 
-        return '+AND+'.join(tokens)
+        return '+'.join(tokens)

@@ -7,6 +7,14 @@ import requests
 from rdmo.domain.models import Attribute
 from rdmo.projects.models import Value
 
+def get_name(item):
+    names = item.get('names', [])
+    if len(names) > 0:
+        # return names[0]['value']
+        ror_display_name = next((n['value'] for n in names if 'ror_display' in n['types']), names[0]['value'])
+        return ror_display_name
+    
+    return ''
 
 @receiver(post_save, sender=Value)
 def value_handler(sender, request=None, instance=None, **kwargs):
@@ -36,28 +44,15 @@ def value_handler(sender, request=None, instance=None, **kwargs):
                 data = response.json()
             except (requests.exceptions.RequestException, requests.exceptions.HTTPError):
                 return
-
-            acronym = next(iter(data.get('acronyms', [])), None)
-            if acronym and 'acronym' in attribute_map:
+            
+            if 'ror_id' in attribute_map:
                 Value.objects.update_or_create(
                     project=instance.project,
-                    attribute=Attribute.objects.get(uri=attribute_map['acronym']),
+                    attribute=Attribute.objects.get(uri=attribute_map['ror_id']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
                     defaults={
-                        'text': acronym
-                    }
-                )
-
-            alias = next(iter(data.get('aliases', [])), None)
-            if alias and 'alias' in attribute_map:
-                Value.objects.update_or_create(
-                    project=instance.project,
-                    attribute=Attribute.objects.get(uri=attribute_map['alias']),
-                    set_prefix=instance.set_prefix,
-                    set_index=instance.set_index,
-                    defaults={
-                        'text': alias
+                        'text': data.get('id')
                     }
                 )
 
@@ -68,6 +63,6 @@ def value_handler(sender, request=None, instance=None, **kwargs):
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
                     defaults={
-                        'text': data.get('name')
+                        'text': get_name(data)
                     }
                 )
