@@ -10,7 +10,6 @@ from rdmo.projects.models import Value
 def get_name(item):
     names = item.get('names', [])
     if len(names) > 0:
-        # return names[0]['value']
         ror_display_name = next((n['value'] for n in names if 'ror_display' in n['types']), names[0]['value'])
         return ror_display_name
     
