@@ -40,6 +40,20 @@ ROR_PROVIDER_MAP = [
 ]
 ```
 
+`ROR_PROVIDER_MAP` and `ROR_PROVIDER_URL` for SMP catalogue:
+
+```python
+ROR_PROVIDER_URL = 'https://api.ror.org/v2/'
+
+ROR_PROVIDER_MAP = [
+    {
+        'ror': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation/ror-autocomplete',
+        'ror_id': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation/ror-id',
+        'name': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation'
+    }
+]
+```
+
 In this case, a change to the identifier of a partner (`https://rdmorganiser.github.io/terms/domain/project/partner/ror`) will update their name (`https://rdmorganiser.github.io/terms/domain/project/partner/name`) automatically. `ROR_PROVIDER_MAP` is a list of mappings, since multiple ROR ID could be used and should update different other values.
 
 While not required, you can add a custom `User-Agent` to your requests so that the provider can perform statistical analyses and, if you add an email address, might contact you. This can be done by adding the following to your settings.
