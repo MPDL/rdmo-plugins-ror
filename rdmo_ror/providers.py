@@ -1,6 +1,7 @@
 import re
 
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 import requests
 
@@ -12,6 +13,10 @@ class RorProvider(Provider):
 
     search = True
     refresh = True
+
+    widget_props = {
+        'noOptionsMessage_text': _('No options found: try a different search term or another language')
+    }
 
     def get_options(self, project, search=None, user=None, site=None):
         if search and len(search) > 2:
