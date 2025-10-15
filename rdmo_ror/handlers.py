@@ -50,6 +50,7 @@ def value_handler(sender, request=None, instance=None, **kwargs):
                     attribute=Attribute.objects.get(uri=attribute_map['ror_id']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
+                    set_collection=True,
                     defaults={
                         'text': data.get('id')
                     }
@@ -61,6 +62,7 @@ def value_handler(sender, request=None, instance=None, **kwargs):
                     attribute=Attribute.objects.get(uri=attribute_map['name']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
+                    set_collection=True,
                     defaults={
                         'text': get_name(data)
                     }
