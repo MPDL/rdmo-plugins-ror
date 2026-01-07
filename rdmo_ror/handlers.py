@@ -63,7 +63,6 @@ def value_handler(sender, request=None, instance=None, **kwargs):
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
                     defaults={
-                        'text': get_name(data),
-                        'set_collection': True
+                        'text': get_name(data)
                     }
                 )
