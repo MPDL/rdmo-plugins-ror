@@ -15,10 +15,6 @@ class RorProvider(Provider):
     search = True
     refresh = True
 
-    widget_props = {
-        'noOptionsMessage_text': _('No options found: try a different search term or another language')
-    }
-
     def get_options(self, project, search=None, user=None, site=None):
         if search:
             url = getattr(settings, 'ROR_PROVIDER_URL', 'https://api.ror.org/v2/').rstrip('/')
