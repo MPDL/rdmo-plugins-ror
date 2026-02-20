@@ -48,7 +48,8 @@ class RorProvider(Provider):
         ror_name = get_name(item)
         ror_img = static('ror/img/ROR.png')
         ror_link = f'<a href="{ror_id}" target="_blank" ><img height="16" src="{ror_img}" alt="ROR logo" /> {ror_id}</a>'
-        return f'{ror_name} {ror_link}' if ror_name else ror_link
+        # return f'{ror_name} {ror_link}' if ror_name else ror_link
+        return f'{ror_name}' if ror_name else ror_link
 
     def get_search(self, search):
         # reverse get_text to perform the search, remove everything after [
