@@ -34,7 +34,7 @@ def ror_handler(sender, instance=None, **kwargs):
         if 'ror' in attribute_map and instance.attribute.uri == attribute_map['ror']:
             # query the orcid api for the record for this orcid
             try:
-                url = getattr(settings, 'ROR_PROVIDER_URL', 'https://api.ror.org/v1/').rstrip('/')
+                url = getattr(settings, 'ROR_PROVIDER_URL', 'https://api.ror.org/v2/').rstrip('/')
                 headers = getattr(settings, 'ROR_PROVIDER_HEADERS', {})
 
                 response = requests.get(f'{url}/organizations/{instance.external_id}', headers=headers)
