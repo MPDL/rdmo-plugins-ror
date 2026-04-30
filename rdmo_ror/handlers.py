@@ -1,22 +1,35 @@
 from django.conf import settings
-from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import get_language
 
 import requests
 
 from rdmo.domain.models import Attribute
 from rdmo.projects.models import Value
+from rdmo.projects.signals import value_created, value_updated
 
 def get_name(item):
+    lang = get_language()
     names = item.get('names', [])
+
     if len(names) > 0:
-        ror_display_name = next((n['value'] for n in names if 'ror_display' in n['types']), names[0]['value'])
-        return ror_display_name
+        name = (
+            next(
+                (n['value'] for n in names if 'label' in name['types'] and name['lang'] == lang), 
+                None
+            ) or
+            next(
+                (n['value'] for n in names if 'ror_display' in n['types']), 
+                names[0]['value']
+            )
+        )
+        return name
     
     return ''
 
-@receiver(post_save, sender=Value)
-def ror_handler(sender, instance=None, **kwargs):
+@receiver(value_created, sender=Value)
+@receiver(value_updated, sender=Value)
+def ror_handler(signal, sender, instance=None, **kwargs):
     # check for ROR_PROVIDER_MAP
     if not getattr(settings, 'ROR_PROVIDER_MAP', None):
         return
@@ -43,10 +56,11 @@ def ror_handler(sender, instance=None, **kwargs):
                 data = response.json()
             except (requests.exceptions.RequestException, requests.exceptions.HTTPError):
                 return
-            
+
             if 'ror_id' in attribute_map:
                 Value.objects.update_or_create(
                     project=instance.project,
+                    snapshot=None,
                     attribute=Attribute.objects.get(uri=attribute_map['ror_id']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
@@ -56,13 +70,47 @@ def ror_handler(sender, instance=None, **kwargs):
                     }
                 )
 
+            acronym = next(iter([
+                name['value'] for name in data.get('names', []) if 'acronym' in name['types']
+            ]), None)
+
+            if acronym and 'acronym' in attribute_map:
+                Value.objects.update_or_create(
+                    project=instance.project,
+                    snapshot=None,
+
+                    attribute=Attribute.objects.get(uri=attribute_map['acronym']),
+                    set_prefix=instance.set_prefix,
+                    set_index=instance.set_index,
+                    defaults={
+                        'text': acronym,
+                        'set_collection': True
+                    }
+                )
+
+            alias = next(iter(data.get('aliases', [])), None)
+            if alias and 'alias' in attribute_map:
+                Value.objects.update_or_create(
+                    project=instance.project,
+                    snapshot=None,
+                    attribute=Attribute.objects.get(uri=attribute_map['alias']),
+                    set_prefix=instance.set_prefix,
+                    set_index=instance.set_index,
+                    defaults={
+                        'text': alias,
+                        'set_collection': True
+                    }
+                )
+
             if 'name' in attribute_map:
                 Value.objects.update_or_create(
                     project=instance.project,
+                    snapshot=None,
                     attribute=Attribute.objects.get(uri=attribute_map['name']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
                     defaults={
-                        'text': get_name(data)
+                        'text': get_name(data),
+                        'set_collection': True
                     }
                 )
