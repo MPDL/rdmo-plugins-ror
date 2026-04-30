@@ -15,7 +15,7 @@ def get_name(item):
     if len(names) > 0:
         name = (
             next(
-                (n['value'] for n in names if 'label' in name['types'] and name['lang'] == lang), 
+                (n['value'] for n in names if 'label' in n['types'] and n['lang'] == lang), 
                 None
             ) or
             next(
