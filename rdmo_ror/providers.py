@@ -2,13 +2,13 @@ import re
 
 from django.conf import settings
 from django.templatetags.static import static
-from django.utils.translation import get_language, gettext_lazy as _
 
 import requests
 
 from rdmo.options.providers import Provider
 
 from .handlers import get_name
+
 
 class RorProvider(Provider):
 
@@ -42,12 +42,12 @@ class RorProvider(Provider):
 
     def get_id(self, item):
         return item.get('id', '')
-    
+
     def get_text(self, item):
-        ror_id = self.get_id(item)
+        _id = self.get_id(item)
         ror_name = get_name(item)
-        ror_img = static('ror/img/ROR.png')
-        ror_link = f'<a href="{ror_id}" target="_blank" ><img height="16" src="{ror_img}" alt="ROR logo" /> {ror_id}</a>'
+        img = static('ror/img/ROR.png')
+        ror_link = f'<a href="{_id}" target="_blank" ><img height="16" src="{img}" alt="ROR logo" /> {_id}</a>'
         return f'{ror_name} {ror_link}' if ror_name else ror_link
 
     def get_search(self, search):

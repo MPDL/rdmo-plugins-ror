@@ -8,6 +8,7 @@ from rdmo.domain.models import Attribute
 from rdmo.projects.models import Value
 from rdmo.projects.signals import value_created, value_updated
 
+
 def get_name(item):
     lang = get_language()
     names = item.get('names', [])
@@ -15,16 +16,16 @@ def get_name(item):
     if len(names) > 0:
         name = (
             next(
-                (n['value'] for n in names if 'label' in n['types'] and n['lang'] == lang), 
+                (n['value'] for n in names if 'label' in n['types'] and n['lang'] == lang),
                 None
             ) or
             next(
-                (n['value'] for n in names if 'ror_display' in n['types']), 
+                (n['value'] for n in names if 'ror_display' in n['types']),
                 names[0]['value']
             )
         )
         return name
-    
+
     return ''
 
 @receiver(value_created, sender=Value)
