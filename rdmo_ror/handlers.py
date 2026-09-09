@@ -9,28 +9,11 @@ from rdmo.projects.models import Value
 from rdmo.projects.signals import value_created, value_updated
 
 
-def get_name(item):
-    lang = get_language()
-    names = item.get('names', [])
-
-    if len(names) > 0:
-        name = (
-            next(
-                (n['value'] for n in names if 'label' in n['types'] and n['lang'] == lang),
-                None
-            ) or
-            next(
-                (n['value'] for n in names if 'ror_display' in n['types']),
-                names[0]['value']
-            )
-        )
-        return name
-
-    return ''
-
 @receiver(value_created, sender=Value)
 @receiver(value_updated, sender=Value)
 def ror_handler(signal, sender, instance=None, **kwargs):
+    lang = get_language()
+
     # check for ROR_PROVIDER_MAP
     if not getattr(settings, 'ROR_PROVIDER_MAP', None):
         return
@@ -65,10 +48,7 @@ def ror_handler(signal, sender, instance=None, **kwargs):
                     attribute=Attribute.objects.get(uri=attribute_map['ror_id']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
-                    defaults={
-                        'text': data.get('id'),
-                        'set_collection': True
-                    }
+                    defaults={'text': data.get('id'), 'set_collection': True},
                 )
 
             acronym_list = [
@@ -88,14 +68,10 @@ def ror_handler(signal, sender, instance=None, **kwargs):
                 Value.objects.update_or_create(
                     project=instance.project,
                     snapshot=None,
-
                     attribute=Attribute.objects.get(uri=attribute_map['acronym']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
-                    defaults={
-                        'text': acronym,
-                        'set_collection': True
-                    }
+                    defaults={'text': acronym, 'set_collection': True},
                 )
 
             alias = next(iter(data.get('aliases', [])), None)
@@ -106,10 +82,7 @@ def ror_handler(signal, sender, instance=None, **kwargs):
                     attribute=Attribute.objects.get(uri=attribute_map['alias']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
-                    defaults={
-                        'text': alias,
-                        'set_collection': True
-                    }
+                    defaults={'text': alias, 'set_collection': True},
                 )
 
             if 'name' in attribute_map:
@@ -119,8 +92,5 @@ def ror_handler(signal, sender, instance=None, **kwargs):
                     attribute=Attribute.objects.get(uri=attribute_map['name']),
                     set_prefix=instance.set_prefix,
                     set_index=instance.set_index,
-                    defaults={
-                        'text': name, # get_name(data),
-                        'set_collection': True
-                    }
+                    defaults={'text': name, 'set_collection': True},
                 )
