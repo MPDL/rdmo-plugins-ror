@@ -1,4 +1,4 @@
-rdmo-plugins-ror
+rdmo-plugins-ror (MaxIT fork - adapted for the SMP catalogue)
 ================
 
 This plugin implements dynamic option set, that queries the expanded-search endpoint of the [ROR API](https://ror.readme.io/docs/rest-api).
@@ -10,7 +10,7 @@ Setup
 Install the plugin in your RDMO virtual environment using pip (directly from GitHub):
 
 ```bash
-pip install git+https://github.com/MPDL/rdmo-plugins-ror@dev
+pip install git+https://github.com/MPDL/rdmo-plugins-ror
 ```
 
 Add the `rdmo_ror` app to `INSTALLED_APPS` and the plugin to `OPTIONSET_PROVIDERS` in `config/settings/local.py`:
@@ -27,6 +27,28 @@ OPTIONSET_PROVIDERS += [
 
 The option set provider should now be selectable for option sets in your RDMO installation. For a minimal example catalog, see the files in `xml`.
 
+
+## Settings for the SMP catalogue
+
+```python
+ROR_PROVIDER_URL = 'https://api.ror.org/v2/'
+
+ROR_STORE_NAME = True
+
+ROR_PROVIDER_MAP = [
+    {
+        'ror': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation/ror-autocomplete',
+        'ror_id': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation/ror-id',
+        'name': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation'
+    }
+]
+```
+
+In this case, updating the ROR search value for a contributor (`https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation/ror-autocomplete`) will update their ror id and affiliation automatically.
+
+
+## General example
+
 If a selection of a ROR ID should update other fields, you can add a `ROR_PROVIDER_MAP` in your settings, e.g.:
 
 ```python
@@ -36,20 +58,6 @@ ROR_PROVIDER_MAP = [
         'alias': 'https://rdmorganiser.github.io/terms/domain/project/partner/id',
         'acronym': 'https://rdmorganiser.github.io/terms/domain/project/partner/id',
         'name': 'https://rdmorganiser.github.io/terms/domain/project/partner/name',
-    }
-]
-```
-
-`ROR_PROVIDER_MAP` and `ROR_PROVIDER_URL` for SMP catalogue:
-
-```python
-ROR_PROVIDER_URL = 'https://api.ror.org/v2/'
-
-ROR_PROVIDER_MAP = [
-    {
-        'ror': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation/ror-autocomplete',
-        'ror_id': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation/ror-id',
-        'name': 'https://rdmo.mpdl.mpg.de/terms/domain/project/partner/affiliation'
     }
 ]
 ```
