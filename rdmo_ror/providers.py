@@ -11,7 +11,6 @@ from .handlers import get_name
 
 
 class RorProvider(Provider):
-
     search = True
     refresh = True
 
@@ -20,9 +19,13 @@ class RorProvider(Provider):
             url = getattr(settings, 'ROR_PROVIDER_URL', 'https://api.ror.org/v2/').rstrip('/')
             headers = getattr(settings, 'ROR_PROVIDER_HEADERS', {})
 
-            response = requests.get(url + '/organizations', params={
-                'query': self.get_search(search)
-            }, headers=headers)
+            response = requests.get(
+                url + '/organizations',
+                params={
+                    'query': self.get_search(search),
+                },
+                headers=headers,
+            )
 
             try:
                 data = response.json()
@@ -33,8 +36,10 @@ class RorProvider(Provider):
                     return [
                         {
                             'id': self.get_id(item),
-                            'text': self.get_text(item)
-                        } for item in data['items']
+                            'text': self.get_text(item),
+                            'help': self.get_help(item),
+                        }
+                        for item in data['items']
                     ]
 
         # return an empty list by default
@@ -44,11 +49,26 @@ class RorProvider(Provider):
         return item.get('id', '')
 
     def get_text(self, item):
-        _id = self.get_id(item)
-        ror_name = get_name(item)
-        img = static('ror/img/ROR.png')
-        ror_link = f'<a href="{_id}" target="_blank" ><img height="16" src="{img}" alt="ROR logo" /> {_id}</a>'
+        ror_id = self.get_id(item)
+        ror_name = self.get_name(item) if getattr(settings, 'ROR_STORE_NAME', True) else ''
+        ror_img = static('ror/img/ROR.png')
+        ror_link = f'<a href="{ror_id}" target="_blank" ><img height="16" src="{ror_img}" alt="ROR logo" /> {ror_id}</a>'
         return f'{ror_name} {ror_link}' if ror_name else ror_link
+
+    def get_name(self, item):
+        lang = get_language()
+
+        label_list = [
+            name['value'] for name in item.get('names', []) if 'label' in name['types'] and name['lang'] == lang
+        ]  # fmt: skip
+        ror_display_list = [
+            name['value'] for name in item.get('names', []) if 'ror_display' in name['types']
+        ]  # fmt: skip
+
+        return next(iter(label_list), None) or next(iter(ror_display_list), None)
+
+    def get_help(self, item):
+        return '' if getattr(settings, 'ROR_STORE_NAME', True) else f'[{self.get_name(item)}]'
 
     def get_search(self, search):
         # reverse get_text to perform the search, remove everything after [
